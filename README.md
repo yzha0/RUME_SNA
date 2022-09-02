@@ -1,2 +1,2 @@
 # RUME_SNA
-Survey Data and Network analysis using Igraph package
+Survey data collection and Network analysis using Igraph package
