@@ -1,0 +1,877 @@
+---
+title: "SNA-1"
+author: "Yuhao Zhao"
+date: "6/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I. Data Collection
+
+## 1. Survey Data
+
+Data used for the SNA analysis was collected using surveys in which participants were asked to indicate their relationship across members of a network community across three time-periods, 1) at the time of the first network activity, 2) several months after the initial convening, and 3) after a year of additional network activities. The survey was pre-populated with names of network members and additional names were added to follow-up surveys as new members joined the network.  For example, all participants were asked the following survey question: 
+
+-   The leadership team is interested in understanding the evolution of relationships among Summit participants. In order to understand this evolution, we ask that you follow the directions below to indicate your relationship(s) among registered participants at this point in time.
+
+    1)Relationship as of Month 2019
+
+    2)Relationship as of Month 2020
+
+    3)Relationship as of Month 2021
+
+Professional collaboration is defined as actively engaging in cooperative work with another person. 
+
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+|          | 1 - This is me | 2 - I am not familiar with this person | 3 - I am familiar with this person's work\\ | 4 - I have met this person | 5 - I have professionally collaborated with this person |
++==========+================+========================================+=============================================+============================+=========================================================+
+| Name1    | 1              | \                                      | \                                           | \                          | \                                                       |
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+| Name2    | \              | \                                      | \                                           | \                          | 1                                                       |
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+| Name3    | \              | 1                                      | \                                           | \                          | \                                                       |
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+| Name4    | \              | \                                      | \                                           | 1                          | \                                                       |
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+| Name5    | \              | \                                      | \                                           | \                          | 1                                                       |
++----------+----------------+----------------------------------------+---------------------------------------------+----------------------------+---------------------------------------------------------+
+
+-   Data was then exported to an excel file and saved as a workbook (.xlsx). 
+
+|     | A     | B     | C     | D     | E     | F     |
+|-----|-------|-------|-------|-------|-------|-------|
+| 1   | Name  | Name1 | Name2 | Name3 | Name4 | Name5 |
+| 2   | Name1 | 1     | 5     | 2     | 4     | 5     |
+| 3   | Name2 | 5     | 1     | 4     | 5     | 4     |
+| 4   | Name3 | 3     | 5     | 1     | 2     | 2     |
+
+
+[***Excel Direction***]{.underline}***(for people who are more comfortable with excel):***
+
+## 2. Cleaning and Manipulating Network Data
+
+### 2.1. Create Identifier Key
+
+#### 2.1.1. Created a codesheet to assign unique identifiers to each person within the network. 
+
+|     | A   | B     |
+|-----|-----|-------|
+| 1   | ID  | Name  |
+| 2   | 1   | Name1 |
+| 3   | 2   | Name2 |
+| 4   | 3   | Name3 |
+
+#### 2.1.2. Replaced Name column with IDs.[Shown in Blue]
+
+#### 2.1.3. Replaced names of participants' names with unique IDs for variable names. [Shown in Yellow]
+
+![](https://lh6.googleusercontent.com/JEcuo3p-Q-1r8tTLAufQl6lOBE_OtBJlyNflT2knWWSIm9qZjdCOxI-W2aHEH27VN8vm-8VVSs2aVIVLkm3zXGg2OyT1mg8VRP55GVazRNnj3TcVYWcMdu-QQlh0mICVGxVf51Pc1STg9VIP0eEsmNV2nVIbfbzHjka7wwy81bdxn1JsSgBpn-E7A05DWJig)
+
+### 2.2. Identifying Pairs of Professional Collaboration
+
+#### 2.2.1. Copy and pasted cleaned data into the new Excel worksheet.
+
+#### 2.2.2. Copy and paste ID column and variable names into new cells next to original network data. 
+
+![](https://lh4.googleusercontent.com/RiMM7vL7y4T3EnU6CCb-lparcrP2MFriw6LJ4HIqF7tmq5YoTq3Xe7l6V39CgCQ-vjByWM197CDjVQyJuSfOSkP_RqH-TqTnsrSD2DG6pCYxs6kqPlyHXv5Iamr-MKxb7MOxq6WzmF8ZDgNf4BW4ii_Y_ulOs-RFSf-HuvRUHdi8X3P9N858l8zAelwJqT4mFCtP6y70Ig)
+
+#### 2.2.3. Created excel formula to indicate 0 if the participant did not indicate 5 (value denoting professional collaboration) and 1 if the participant did indicate 5 (i.e., professional collaboration) for another participant's name.  
+
+Orange square =IF(B2=5, CONCATENATE(\$H2,",",I\$1), "")
+
+![](https://lh6.googleusercontent.com/9m1AC4b9k7rQNjAemhE634dnXFBbgzVGntInKSdElTPY6CHVxKdtmOWv972yDKKCjNvO1iVFHsyu1A5wFJgWB0IyRCXM6z2sX-jOuJq5oyS_kr3AHzCjagvxLU31mZd4QNlLa0Ir9k9vN16uETsotj6OM1dkhbwL5zG5vOt45PCrbjxGEurx40flHBkttF7gnAMR3b1DUg)\
+
+Green Square =IF(E3=5, CONCATENATE(\$H3,",",K\$1), "")
+
+-   \$ in front of column letter indicates to not update the column letter as you move across cells. 
+
+-   \$ in front of the row number indicates to not update the row number as you move across cells.
+
+-   "" indicates to leave the cell blank if the condition is not satisfied. 
+
+#### 2.2.4. Copy and paste the data to remove formulas. Copy \>\> Paste Special -- Values and Number Formats. 
+
+### 2.3. Creating Edge List
+
+#### 2.3.1. Copy and paste the data into a new Excel sheet. Manually compile all coordinates into a single column.
+
+<table>
+<thead>
+<tr class="header">
+<th><p></p></th>
+<th><p>A</p></th>
+<th><p>B</p></th>
+<th><p>C</p></th>
+<th><p>D</p></th>
+<th><p>E</p></th>
+<th><p>F</p></th>
+<th><p>G</p></th>
+<th><p>H</p></th>
+<th><p>I</p></th>
+<th><p>J</p></th>
+<th><p>K</p></th>
+<th><p>L</p></th>
+<th><p>M</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p>1</p></td>
+<td><p><strong>Pairs</strong></p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="even">
+<td><p>2</p></td>
+<td><p>2,1</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="odd">
+<td><p>3</p></td>
+<td><p>1,2</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="even">
+<td><p>4</p></td>
+<td><p>3,2</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+</tbody>
+</table>
+
+#### 2.3.2. Create new column names (to/from) and convert text to columns. Highlight column A. Data \>\> Text to Columns \>\> Delimited -- Comma -- Next -- Finish
+
+<table>
+<thead>
+<tr class="header">
+<th><p></p></th>
+<th><p>A</p></th>
+<th><p>B</p></th>
+<th><p>C</p></th>
+<th><p>D</p></th>
+<th><p>E</p></th>
+<th><p>F</p></th>
+<th><p>G</p></th>
+<th><p>H</p></th>
+<th><p>I</p></th>
+<th><p>J</p></th>
+<th><p>K</p></th>
+<th><p>L</p></th>
+<th><p>M</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p>1</p></td>
+<td><p><strong>To</strong></p></td>
+<td><p><strong>From</strong></p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="even">
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>1</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="odd">
+<td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>2</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+<tr class="even">
+<td><p>4</p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+<td><p><br />
+</p></td>
+</tr>
+</tbody>
+</table>
+
+[***R Direction(***]{.underline}***for people who are comfortable with R):[\
+]{.underline}***
+
+# II. Preparation
+
+## 1. Load-In
+
+```{r}
+# Store string containing all required packages
+my_packages <- c('igraph', 'RColorBrewer', 'ggplot2', 'readxl', 'Matrix')
+```
+
+Figure out which of these packages is already installed
+
+```{r}
+# Store all installed packages
+ya_installed <- library()$results[,1]
+# Check whether required packages are already installed and grab only those that still need installation
+need_install<-my_packages[!(my_packages %in% ya_installed)]
+#install required packages
+lapply(need_install, install.packages, character.only = TRUE)
+```
+
+Now, load only unloaded packages
+
+```{r}
+# Store all installed packages
+ya_loaded <- (.packages())
+# Check whether required packages are already installed and grab only those that still need installation
+need_load<-my_packages[!(my_packages %in% ya_loaded)]
+# Load required packages
+lapply(need_load, require, character.only = TRUE)
+```
+
+## 2. Read-In Cleaned Edgelist Data
+
+This survey dataset is collected by Dr. Robin Taylor from participants in SCORE-UBE summit and SCORE group. Members indicated the nature of their relationship with each participant in the network by selecting one of the following response options: (1) This is me; (2) I am not familiar with this person; (3) I am familiar with this person's work; (4) I have met this person; or (4) I have professionally collaborated with this person. All survey responses are de-identified.
+
+```{r}
+
+SCORE <- read_excel("SCORENetworkData.xlsx", 
+    sheet = "Total")
+
+```
+
+## 3. Separate Edgelist Data into Corresponding Time Period
+
+We subset the original edgelist data frames into three time periods pre-summit, mid-summit and post-summit.
+
+```{r}
+
+SCORE_pre <- SCORE[which(SCORE[,1]==1),]
+SCORE_mid <- SCORE[which(SCORE[,1]==2),]
+SCORE_Post <- SCORE[which(SCORE[,1]==3),]
+```
+
+## 4. Build Igraph Objects
+
+Here we start using the built-in function in `igraph` package `graph_from_data_frame()` to generate basic graph objects from data frames that we subsetted above.
+
+```{r}
+# build directed network graph objects from dataframes above
+SCORE.g <- graph_from_data_frame(SCORE[,2:3], directed = TRUE)
+pre.g <- graph_from_data_frame(SCORE_pre[,2:3], directed = TRUE)
+mid.g <- graph_from_data_frame(SCORE_mid[,2:3], directed = TRUE)
+post.g <- graph_from_data_frame(SCORE_Post[,2:3], directed = TRUE)
+# Here you can also check summary of some fundamental info
+summary(pre.g)
+summary(mid.g)
+summary(post.g)
+```
+
+## 5. First Glance at structures
+
+To get a basic knowledge of networks, we may want first to look at some of the fundamental but easy-to-access characteristics that are important to network structure as a whole. 1)size of a network is defined as the total number of nodes/agents in the network 2) The density of a network is the total proportion of observed ties to the maximum number of possible ties. 3) diameters of a network looks at how compact a network and is defined as the longest of shortest path across. And all three measures can be easily accessed by using built functions--- `g_order()`; `edge_density()`; `diameter()`.
+
+```{r}
+# Look into the several important characteristics in networks using written function
+n_size <- c(gorder(pre.g), gorder(mid.g), gorder(post.g))
+edge_den <- c(edge_density(pre.g), edge_density(mid.g), edge_density(post.g))
+diameters <- c(diameter(pre.g), diameter(mid.g), diameter(post.g))
+# Binding them into a strctured table
+Sum_table<- cbind(n_size, edge_den, diameters)
+View(Sum_table)
+```
+
+## 6. Assign node attributes--role, color, size to leader teams
+
+To build more intuitive visualizations, we sometimes need to include more effective network graphic design. What are the helpers in our toolkit? Based on the purpose of your research questions/studies, we can highlight certain nodes or edges with distinctive attributes like color, size, shape or styles.
+
+In our context, we already have two types of participants in the survey(PI and non-PI). So we want to assign the PI nodes in network with a different shape from other nodes representing specific roles.
+
+```{r}
+# From the survey data, we first note the PI indices in the networks.
+PI_Index <- c("3", "8", "9", "23", "28", "26")# add 26 to the steering committee
+# Assign roles
+# Change name "PI" to "steering committee"
+V(pre.g)[V(pre.g)$name %in% PI_Index]$role <- "steering committee"
+V(pre.g)[!(V(pre.g)$name %in% PI_Index)]$role <- "Non_sc"
+V(mid.g)[V(mid.g)$name %in% PI_Index]$role <- "steering committee"
+V(mid.g)[!(V(mid.g)$name %in% PI_Index)]$role <- "Non_sc"
+V(post.g)[V(post.g)$name %in% PI_Index]$role <- "steering committee"
+V(post.g)[!(V(post.g)$name %in% PI_Index)]$role <- "Non_sc"
+# Based on roles assign shape attributes
+V(pre.g)[V(pre.g)$role == "steering committee"]$shape <- "square"
+V(pre.g)[V(pre.g)$role == "Non_sc"]$shape <- "circle"
+V(mid.g)[V(mid.g)$role == "steering committee"]$shape <- "square"
+V(mid.g)[V(mid.g)$role == "Non_sc"]$shape <- "circle"
+V(post.g)[V(post.g)$role == "steering committee"]$shape <- "square"
+V(post.g)[V(post.g)$role == "Non_sc"]$shape <- "circle"
+```
+
+## 7. Extract Adjacency Matrices
+
+Here we extract the adjacency matrix from the graph objects and store them for further use in study. Like edgelist, adjacency matrix is another common type of data frame contain the essential network information and prepare researchers for further network analysis using R. Edge list a a two column of dataframe which directly shows the links between actors, whereas adjacency matrix shows a square matrix where a 1 indicates a tie between two nodes, and a 0 indicates no tie. If the network is non-directed, then the matrix would be symmetric around the diagonal.
+
+```{r}
+# Generate the adjacency matrices from the three seperate graph objects
+pre_matrix <- as.matrix(get.adjacency(pre.g, sparse = FALSE))
+mid_matrix <- as.matrix(get.adjacency(mid.g, sparse = FALSE))
+post_matrix <- as.matrix(get.adjacency(post.g, sparse = FALSE))
+# A glance at the generated adjaceny matrices
+View(pre_matrix)
+View(mid_matrix)
+View(post_matrix)
+```
+
+# III. Data Cleaning
+
+## 1. Remove Vertices not Appear In Both Periods
+
+Here we are starting to do the data cleaning for each pair of networks. Since what we are trying to find are the changes in collaborations among participants in pairs, we will investigate it by looking at the difference matrices([adj mat from time 2] - [adj mat from time 1]= difference matrix which has entries (-),0,(+). Where the negative entries indicates the edge loss/decreasing in collaboration status; the 0 entries indicates no change to the collaboration and positive entries indicate the new gains of professional collaboration. In order to get the difference matrices, we first need to remove anyone who didn't appear in both time stages to do the matrix reduction.
+
+To clean up the networks, we utilize `the delete_vertices()` function to delete any nodes not in both of the networks in pairs. And then we return the cleaned network objects in each pair for further calculation in matrix forms.
+
+```{r}
+clean_mid.g<- delete_vertices(mid.g, V(mid.g)[!(V(mid.g)$name %in% intersect(V(pre.g)$name, V(mid.g)$name))]) #group 1 pre-mid, pre not change
+clean_mid2.g <- delete_vertices(mid.g, V(mid.g)[!(V(mid.g)$name %in% intersect(V(mid.g)$name, V(post.g)$name))])# group 2 mid-post
+clean_post2.g <- delete_vertices(post.g, V(post.g)[!(V(post.g)$name %in% intersect(V(mid.g)$name, V(post.g)$name))]) # group 2 mid-post
+clean_pre3.g <- delete_vertices(pre.g, V(pre.g)[!(V(pre.g)$name %in% intersect(V(pre.g)$name, V(post.g)$name))]) # group 3 pre-post
+clean_post3.g <- delete_vertices(post.g, V(post.g)[!(V(post.g)$name %in% intersect(V(pre.g)$name, V(post.g)$name))])
+```
+
+## 2. Return Cleaned Matrix(with order adjusted)
+
+Here we just get the desired adjacency matrix from the cleaned network objects above and including one further action---reorder the actors in increasing order by their names(in numbers) so that we can easily calculate the difference matrices we want.
+
+```{r}
+# We adjust row/col orders so that both row and columns have indices increasing from left to right and top to bottom.
+mid1_matrix <- as.matrix(get.adjacency(clean_mid.g, sparse = FALSE))
+mid1_mat<- mid1_matrix[order(as.integer(rownames(mid1_matrix))),order(as.integer(colnames(mid1_matrix)))]
+pre_mat <- pre_matrix[order(as.integer(rownames(pre_matrix))),order(as.integer(colnames(pre_matrix)))]
+
+mid2_matrix <- as.matrix(get.adjacency(clean_mid2.g, sparse = FALSE))
+mid2_mat<-mid2_matrix[order(as.integer(rownames(mid2_matrix))),order(as.integer(colnames(mid2_matrix)))]
+
+post2_matrix <-  as.matrix(get.adjacency(clean_post2.g, sparse = FALSE))
+post2_mat<- post2_matrix[order(as.integer(rownames(post2_matrix))),order(as.integer(colnames(post2_matrix)))]
+
+pre3_matrix <-as.matrix(get.adjacency(clean_pre3.g, sparse = FALSE))
+pre3_mat<- pre3_matrix[order(as.integer(rownames(pre3_matrix))),order(as.integer(colnames(pre3_matrix)))]
+
+post3_matrix <-  as.matrix(get.adjacency(clean_post3.g, sparse = FALSE))
+post3_mat<- post3_matrix[order(as.integer(rownames(post3_matrix))),order(as.integer(colnames(post3_matrix)))]
+```
+
+## 3. Difference Matrix
+
+Follow this formula we got [adj mat from time 2] - [adj mat from time 1]= difference matrix
+
+```{r}
+group1_diff<- mid1_mat-pre_mat
+group2_diff<- post2_mat-mid2_mat
+group3_diff <- post3_mat-pre3_mat
+```
+
+## 4. Assign Attributes
+
+### 4.1. Import participation and summit score
+
+In this step, we import the pre-collected participation scores for de-indentified survey participants to include it as a new node attributes.
+
+```{r}
+# Import new data---frequencies of participations collected by RIOS
+SCORE_Network_Participation_De_Identified <- read_excel("~/Desktop/Research/Summer 2022 with Carrie/SCORE-SNA/SCORE Network Participation De-Identified.xlsx", 
+    range = "A1:E67")
+View(SCORE_Network_Participation_De_Identified)
+```
+
+### 4.2. Assign new vertex attributes
+
+Here we are trying to assign two attributes to our nodes in networks: the first is number of total participation(in six events) as size of the node; and second the node color for whether attending summit or not. And we repeat this process for every pair of networks we are studying. And we also clear up the NA replacing with zero value.
+
+Specifically, we should be careful about the color chosen here. Here we utilize a website called [Color Brewer 2.0](https://colorbrewer2.org/) to find appropriate and colorblind-safe options for further visualizations.
+
+### 4.2.1. Pre-Mid
+
+```{r}
+# participation score as size of each node
+V(pre.g)[as.integer(V(pre.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(pre.g)[as.integer(V(pre.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<-  SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(pre.g)$name)]
+
+V(clean_mid.g)[as.integer(V(clean_mid.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_mid.g)[as.integer(V(clean_mid.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<- SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_mid.g)$name)]
+
+# attending summit or not 
+V(pre.g)[as.integer(V(pre.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(pre.g)[as.integer(V(pre.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<-  SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(pre.g)$name)]
+
+V(clean_mid.g)[as.integer(V(clean_mid.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_mid.g)[as.integer(V(clean_mid.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<- SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_mid.g)$name)]
+
+# replace na with 0
+V(pre.g)$summit[is.na(V(pre.g)$summit)]<-0
+V(clean_mid.g)$summit[is.na(V(clean_mid.g)$summit)]<-0
+
+V(pre.g)$size[is.na(V(pre.g)$size)]<-0
+V(clean_mid.g)$size[is.na(V(clean_mid.g)$size)]<-0
+
+# assign color based on summit attendance
+V(pre.g)[which(V(pre.g)$summit==1)]$color <- "#a6cee3"
+V(pre.g)[which(V(pre.g)$summit==0)]$color <- "#1f78b4"
+
+V(clean_mid.g)[which(V(clean_mid.g)$summit==1)]$color <- "#a6cee3"
+V(clean_mid.g)[which(V(clean_mid.g)$summit==0)]$color <- "#1f78b4"
+```
+
+### 4.2.2. Mid-Post
+
+```{r}
+# participation score as size of each node
+V(clean_mid2.g)[as.integer(V(clean_mid2.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_mid2.g)[as.integer(V(clean_mid2.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<-  SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_mid2.g)$name)]
+
+V(clean_post2.g)[as.integer(V(clean_post2.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_post2.g)[as.integer(V(clean_post2.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<- SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_post2.g)$name)]
+
+# attending summit or not 
+V(clean_mid2.g)[as.integer(V(clean_mid2.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_mid2.g)[as.integer(V(clean_mid2.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<-  SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_mid2.g)$name)]
+
+V(clean_post2.g)[as.integer(V(clean_post2.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_post2.g)[as.integer(V(clean_post2.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<- SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_post2.g)$name)]
+
+# replace na with 0
+V(clean_mid2.g)$summit[is.na(V(clean_mid2.g)$summit)]<-0
+V(clean_post2.g)$summit[is.na(V(clean_post2.g)$summit)]<-0
+
+V(clean_mid2.g)$size[is.na(V(clean_mid2.g)$size)]<-0
+V(clean_post2.g)$size[is.na(V(clean_post2.g)$size)]<-0
+
+# assign color based on summit attendance
+V(clean_mid2.g)[which(V(clean_mid2.g)$summit==1)]$color <- "#a6cee3"
+V(clean_mid2.g)[which(V(clean_mid2.g)$summit==0)]$color <- "#1f78b4"
+
+V(clean_post2.g)[which(V(clean_post2.g)$summit==1)]$color <- "#a6cee3"
+V(clean_post2.g)[which(V(clean_post2.g)$summit==0)]$color <- "#1f78b4"
+```
+
+### 4.2.3. Pre-Post
+
+```{r}
+# participation score as size of each node
+V(clean_pre3.g)[as.integer(V(clean_pre3.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_pre3.g)[as.integer(V(clean_pre3.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<-  SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_pre3.g)$name)]
+
+V(clean_post3.g)[as.integer(V(clean_post3.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_post3.g)[as.integer(V(clean_post3.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$size<- SCORE_Network_Participation_De_Identified$`participation until june 21`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_post3.g)$name)]
+
+# attending summit or not 
+V(clean_pre3.g)[as.integer(V(clean_pre3.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_pre3.g)[as.integer(V(clean_pre3.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<-  SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_pre3.g)$name)]
+
+V(clean_post3.g)[as.integer(V(clean_post3.g)$name) %in% SCORE_Network_Participation_De_Identified$id][order(as.integer(V(clean_post3.g)[as.integer(V(clean_post3.g)$name) %in% SCORE_Network_Participation_De_Identified$id]$name))]$summit<- SCORE_Network_Participation_De_Identified$`Summit`[SCORE_Network_Participation_De_Identified$id %in% as.integer(V(clean_post3.g)$name)]
+
+# replace na with 0
+V(clean_pre3.g)$summit[is.na(V(clean_pre3.g)$summit)]<-0
+V(clean_post3.g)$summit[is.na(V(clean_post3.g)$summit)]<-0
+
+V(clean_pre3.g)$size[is.na(V(clean_pre3.g)$size)]<-0
+V(clean_post3.g)$size[is.na(V(clean_post3.g)$size)]<-0
+
+# assign color based on summit attendance
+V(clean_pre3.g)[which(V(clean_pre3.g)$summit==1)]$color <- "#a6cee3"
+V(clean_pre3.g)[which(V(clean_pre3.g)$summit==0)]$color <- "#1f78b4"
+
+V(clean_post3.g)[which(V(clean_post3.g)$summit==1)]$color <- "#a6cee3"
+V(clean_post3.g)[which(V(clean_post3.g)$summit==0)]$color <- "#1f78b4"
+```
+
+## 5. Adjust Vertices' Order
+
+Here we need to do another trick on the order of nodes in each network object to better help the visualization tasks---we want to re-permute the nodes as the increasing order of their indices so that we can have the same permutation for each pair to save the layout algorithm for plotting our pairwise networks in a way the evolution of collaboration network is more explicit to audiences.
+
+```{r}
+# adjust the orders of vertices by using permute() 
+pre_ordered.g<- permute(pre.g , invPerm(order(as.integer(V(pre.g)$name))))
+clean_mid_ordered.g<- permute(clean_mid.g , invPerm(order(as.integer(V(clean_mid.g)$name))))
+
+clean_mid2_ordered.g<- permute(clean_mid2.g , invPerm(order(as.integer(V(clean_mid2.g)$name))))
+clean_post2_ordered.g<- permute(clean_post2.g , invPerm(order(as.integer(V(clean_post2.g)$name))))
+  
+clean_pre3_ordered.g<- permute(clean_pre3.g, invPerm(order(as.integer(V(clean_pre3.g)$name))))
+clean_post3_ordered.g<- permute(clean_post3.g , invPerm(order(as.integer(V(clean_post3.g)$name))))
+```
+
+## 6. Connectance/Graph density
+
+This is a section for the calculation of Connectance or Graph density. It is a network property defined as the ratio of number of edges and number of maximum possible edges on this network.
+
+```{r}
+# Calculate the edge density for each cleaned networks
+edge_density(pre_ordered.g)
+edge_density(clean_mid_ordered.g)
+
+
+edge_density(clean_mid2_ordered.g)
+edge_density(clean_post2_ordered.g)
+
+edge_density(clean_pre3_ordered.g)
+edge_density(clean_post3_ordered.g)
+```
+
+# IV. Visualize the comparison of networks(exploratory)
+
+In this section, we plot the changes in networks after we cleaned and re-ordered the network pairs.
+
+Some additional plotting parameters and options can be explained here. `vertex.label` is label for each node; `layout` is specified layout algorithm that used for placing vertices and edges on the plane; `main` is the title of the graph more details can be found at [Documentation for Igraph package](https://igraph.org/r/doc/plot.common.html).
+
+## 1. Pre-Mid
+
+```{r}
+par(mfrow=c(1,2))
+set.seed(1)
+# save layout 
+l1<- layout.fruchterman.reingold(pre_ordered.g)
+plot(pre_ordered.g, vertex.label = V(pre_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 2*V(pre_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l1, main="Pre[October 2019]", xlab="connectance= 0.1600529")
+plot(clean_mid_ordered.g, vertex.label = V(clean_mid_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 2*V(clean_mid_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l1, main="Mid[Feburary 2020]",xlab = "connectance= 0.1124339")
+
+legend(-2, -1, legend=c("steering committee","attend Summit", "not attend Summit"), col = c("#a6cee3","#a6cee3", "#1f78b4") , bty = "n", pch=c(15,20,20) , pt.cex = 2, cex = 1, text.col=c("#a6cee3","#a6cee3", "#1f78b4") ,xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,adj = c(0, 0.5), horiz = FALSE)
+```
+
+## 2. Mid-Post
+
+```{r}
+par(mfrow=c(1,2))
+
+set.seed(1)
+
+#save layout
+l2<- layout.fruchterman.reingold(clean_mid2_ordered.g)
+
+
+plot(clean_mid2_ordered.g, vertex.label = V(clean_mid2_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 2*V(clean_mid2_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l2, main="Mid[Feburary 2020]", xlab ="connectance= 0.2352941")
+plot(clean_post2_ordered.g, vertex.label = V(clean_post2_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 2*V(clean_post2_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l2, main="Post[June 2021]", xlab="connectance= 0.2647059")
+
+# Adding graph legends for easier interpretation
+legend(-2, -1, legend=c("steering committee", "attend Summit", "not attend Summit")  , col = c("#a6cee3", "#a6cee3", "#1f78b4") , bty = "n", pch=20 , pt.cex = 2, cex = 1, text.col=c("#a6cee3", "#a6cee3", "#1f78b4") ,xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,adj = c(0, 0.5), horiz = FALSE)
+```
+
+## 3. Pre-Post
+
+```{r}
+par(mfrow=c(1,2))
+# keep constant position in randomization process
+set.seed(1)
+
+# save layout that calculated from the fruchterman.reingold algorithm 
+l3<- layout.fruchterman.reingold(clean_pre3_ordered.g)
+
+# plot the pair of networks based on same layouts
+plot(clean_pre3_ordered.g, vertex.label = V(clean_pre3_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.size= 2*V(clean_pre3_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l3, main="Pre[October 2019]", sub="connectance= 0.2904762")
+plot(clean_post3_ordered.g, vertex.label = V(clean_post3_ordered.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.size= 2*V(clean_post3_ordered.g)$size+5, edge.arrow.size = 0.3, layout=l3, main="Post[June 2021]", sub="connectance= 0.2809524")
+
+# Adding legends to the final visualizations to have a good interpretation of it
+legend(-2, -1, legend=c("steering committee","attend summit", "not attend summit")  , col = c("#a6cee3", "#a6cee3", "#1f78b4") , bty = "n", pch=20 , pt.cex = 2, cex = 1, text.col=c("#a6cee3", "#a6cee3", "#1f78b4") ,xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,adj = c(0, 0.5), horiz = FALSE)
+```
+
+## 4. In-degree summary(optional)
+
+```{r}
+pre_mid_indegree<- cbind(degree(pre_ordered.g, mode = "in"), degree(clean_mid_ordered.g, mode = "in"))
+colnames(pre_mid_indegree)<- c("pre", "mid")
+View(pre_mid_indegree)
+mid_post_indegree<- cbind(degree(clean_mid2_ordered.g, mode = "in"), degree(clean_post2_ordered.g, mode = "in"))
+colnames(mid_post_indegree)<-c("mid", "post")
+View(mid_post_indegree)
+pre_post_indegree<- cbind(degree(clean_pre3_ordered.g, mode = "in"), degree(clean_post3_ordered.g, mode = "in"))
+colnames(pre_post_indegree)<-c("pre", "post")
+View(pre_post_indegree)
+```
+
+# V. Visualize the change of edges
+
+## 1. Find edge change pre-mid
+
+By using the `difference()` function, we can get the the difference of two graphs and only edges present in the first graph but not the second will be included in the new graph. From the new difference graph objects, we can get the new edges added during mid period.
+
+```{r}
+#new edges
+new_pre_mid.g<-difference(clean_mid_ordered.g, pre_ordered.g)
+new_E_pre_mid<- E(new_pre_mid.g)
+
+# lost edges
+lost_pre_mid.g<-difference(pre_ordered.g, clean_mid_ordered.g)
+lost_E_pre_mid<- E(lost_pre_mid.g)
+```
+
+## 2. Edge change mid-post
+
+Same as above.
+
+```{r}
+new_mid_post.g<-difference(clean_post2_ordered.g, clean_mid2_ordered.g)
+new_E_mid_post<- E(new_mid_post.g)
+
+lost_mid_post.g<-difference(clean_mid2_ordered.g, clean_post2_ordered.g)
+lost_E_mid_post<- E(lost_mid_post.g)
+```
+
+## 3. Assign edge attribute indicating the change
+
+Here we want to improve our visualizations of changing networks by using legends and colors onto one network for each pair. In the two sub-sections below, you can see I generate two new graph objects by adding orange edges indicating new collaboration and dotted the loss of pre-existing edges(in dark grey) with all other saved attributes we discussed above. One thing still need to improve is to build function that automatically "painting" the edges rather than manually doing this(as shown here..).
+
+### 3.a. Pre-Mid
+
+```{r}
+
+# Add new edge between pre-mid
+changes_pre_mid.g<- add_edges(pre_ordered.g, c("3","24",  "3","6",  "3","4",  "7","35",  "7","27",  "7","23",  "7","4",  "8","27",  "8","4",  "9","30",  "9","4" , "9","3", "26","33", "26","23", "27","28", "27","9", "27","8",  "27","7",  "27","6", "28","27", "28","24", "35","18", "35","16", "35","9", "35","6"), color="#b2df8a")
+#color the new edges
+E(changes_pre_mid.g)[is.na(E(changes_pre_mid.g)$color)]$color<-"gray33"
+
+# dotted the lost edges
+change_mat<- ends(changes_pre_mid.g, E(changes_pre_mid.g))
+lost_mat<- ends(lost_pre_mid.g, E(lost_pre_mid.g))
+
+E(changes_pre_mid.g)$lty<-1
+E(changes_pre_mid.g)[c(19, 25, 35, 4, 112, 118, 96, 86, 75, 47, 42, 40, 109, 76, 60, 59, 32, 110, 33, 54, 97, 79, 108, 80, 48, 43, 1, 3, 83, 81, 61, 120, 114, 82, 78, 63, 55, 49, 8, 115, 113, 30, 9, 116, 105, 91, 88, 64, 56, 31, 18, 12, 10, 121, 99, 65, 58, 50, 21, 11, 66)]$lty<-3
+```
+
+### 3.b. Mid-Post
+
+```{r}
+# Add new edge between mid-post
+changes_mid_post.g<-add_edges(clean_mid2_ordered.g, c("2","26", "7","24", "8","37", "17","37", "17","32", "17","28", "17","16", "17","9", "17","7", "23","37", "23","28", "23","26", "23","8", "23","7", "23","4", "23","3", "24","37", "24","32", "24","28", "24","26", "24","23", "24","9", "24","8", "24","7", "24","4", "28","37", "28","8", "28","4", "37","32", "37","28", "37","17", "37","9", "37","8", "37","7"), color="#b2df8a")
+E(changes_mid_post.g)[is.na(E(changes_mid_post.g)$color)]$color<-"gray33"
+
+# dotted the lost edges
+change_mat_2<- ends(changes_mid_post.g, E(changes_mid_post.g))
+E(changes_mid_post.g)$lty<-1
+E(changes_mid_post.g)[c(62, 53, 64, 61, 58, 25, 22, 45, 18, 16, 32, 37, 6, 3, 49, 29, 28, 7, 43, 40, 11, 8, 42, 52, 13, 10)]$lty<-3
+```
+
+## 4. Plot the change
+
+Here we just visualize the two changing networks we generated above. The only differences compared to last section is we only plot one network object at once and also we add the legend below the graph which can makes our visualization more effective and intuitive.
+
+```{r}
+# adjust node attribute
+V(changes_pre_mid.g)[which(V(changes_pre_mid.g)$name=="11")]$color<- "#a6cee3"
+```
+
+### 4.a. Visualize changes from pre to mid
+
+```{r}
+# The main title is missing
+plot(changes_pre_mid.g, vertex.label = V(changes_pre_mid.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 8, edge.arrow.size = 0.3, layout=l1)
+legend(0.9, 0, legend=c("steering committee","attend Summit", "not attend Summit", "gain collaboration", "maintain collaboration", "loss collaboration")  , col = c("#a6cee3", "#a6cee3", "#1f78b4", "#b2df8a", "gray33", "gray33") , bty = "n", pch=c(15, 20, 20, NA, NA, NA) , lty =c(0, 0, 0, 1, 1, 2),  pt.cex = 2, cex = 1, text.col=c("#a6cee3","#a6cee3", "#1f78b4", "#b2df8a", "gray33", "gray33") ,xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,adj = c(0, 0.5), horiz = FALSE)
+```
+
+### 4.b. Visualize changes from mid to post
+
+```{r}
+plot(changes_mid_post.g, vertex.label = V(changes_mid_post.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size=2*V(changes_mid_post.g)$size+5 , edge.arrow.size = 0.3, layout=l2)
+legend(0.95, 0, legend=c("steering committee","attend Summit", "not attend Summit", "gain collaboration", "maintain collaboration", "loss collaboration")  , col = c("#a6cee3", "#a6cee3", "#1f78b4", "#b2df8a", "gray33", "gray33") , bty = "n", pch=c(15, 20, 20, NA, NA, NA) , lty =c(0, 0, 0, 1, 1, 2),  pt.cex = 2, cex = 1, text.col=c("#a6cee3","#a6cee3", "#1f78b4", "#b2df8a", "gray33", "gray33") ,xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,adj = c(0, 0.5), horiz = FALSE)
+```
+
+# VI. Cluster Analysis
+
+## 1. Community Detection
+
+Network scientists have developed a variety of subgroup identification algorithms that based on the patterns of ties between different groups. Here we choose to use the detection algorithm by calculating the edge betweenness of edges(The idea is that it is likely that edges connecting separate modules have high edge betweenness, so we gradually remove the edge with highest betweenness score)
+
+```{r}
+c_pre<-cluster_edge_betweenness(pre.g)
+c_post<-cluster_edge_betweenness(post.g)
+membership(c_pre)
+membership(c_post)
+```
+
+And here are the visualizations of community detection on pre and post networks.
+
+```{r}
+plot(c_pre, pre.g, vertex.label=V(pre.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 8, edge.arrow.size = 0.3, layout=layout_with_fr)
+```
+
+```{r}
+plot(c_post, post.g, vertex.label=V(post.g)$name, vertex.label.degree=-pi/2, vertex.label.cex= 0.8,  vertex.label.dist = 1.5, vertex.label.font=2, vertex.size= 8, edge.arrow.size = 0.3, layout=layout_with_fr)
+```
+
+## 2. Cliques of Comparisons(exploratory)
+
+```{r}
+sub_pre<-max_cliques(pre_ordered.g)
+sub_mid<-max_cliques(clean_mid_ordered.g)
+
+sub_mid_2<-max_cliques(clean_mid2_ordered.g)
+sub_post_2<-max_cliques(clean_post2_ordered.g)
+
+```
+
+```{r}
+graph_name<-c("pre", "mid", "mid_2", "post_2")
+lrgclq<-c(clique_num(pre_ordered.g), clique_num(clean_mid_ordered.g), clique_num(clean_mid2_ordered.g), clique_num(clean_post2_ordered.g))
+numclq<-c(27, 27, 13, 15)
+clqinfo <- data.frame(Name= graph_name,Largest_size=lrgclq,
+Number_Max_cliques=numclq)
+clqinfo
+```
